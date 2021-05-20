@@ -1,0 +1,19 @@
+server:
+  port: 8884
+spring:
+  application:
+    name: workflow
+
+  profiles:
+    #active: dev
+    include: ds
+    active: dev
+
+  devtools:
+    restart:
+      #热部署生效
+      enabled: false
+      #设置重启的目录
+      #additional-paths: src/main/java
+      #classpath目录下的WEB-INF文件夹内容修改不重启
+      exclude: WEB-INF/**

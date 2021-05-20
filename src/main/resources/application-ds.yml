@@ -1,0 +1,72 @@
+# 数据库配置文件
+spring:
+  datasource:
+    primary:
+      url: jdbc:mysql://172.23.16.80:3306/flowtest
+      username: root
+      password: dz123!@#
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      type: com.alibaba.druid.pool.DruidDataSource
+
+    #activiti 数据源
+    activiti:
+#      driver: com.mysql.cj.jdbc.Driver
+      # 以下两个hikari时候使用jdbc-url,druid使用url
+#      jdbc-url: jdbc:mysql://172.23.16.80:3306/activiti
+      url: jdbc:mysql://172.23.16.80:3306/activiti
+      username: root
+      password: dz123!@#
+      driverClassName: com.mysql.cj.jdbc.Driver
+      type: com.alibaba.druid.pool.DruidDataSource
+
+    druid:
+      # 下面为连接池的补充设置，应用到上面所有数据源中
+      # 初始化大小，最小，最大
+      initial-size: 5
+      min-idle: 20
+      max-active: 60
+      # 配置获取连接等待超时的时间
+      max-wait: 60000
+      # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      time-between-eviction-runs-millis: 60000
+      # 配置一个连接在池中最小生存的时间，单位是毫秒
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1;
+      #    validation-query: SELECT 1 FROM DUAL;
+      test-on-borrow: false
+      test-while-idle: true
+      test-on-return: false
+      # 打开PSCache，并且指定每个连接上PSCache的大小
+      pool-prepared-statements: true
+      maxPoolPreparedStatementPerConnectionSize: 20
+      # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+      filters: stat,wall,slf4j
+      #proxyFilters: wall2
+      #connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000;druid.wall.selectWhereAlwayTrueCheck=false;druid.wall.conditionAndAlwayTrueAllow=true
+
+      # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
+      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+      # 合并多个DruidDataSource的监控数据
+      #useGlobalDataSourceStat: true
+      web-stat-filter:
+        enabled: true
+        url-pattern: /*
+        exclusions: "*.js,*.gif,*.jpg,*.png,*.ui,*.ico,/druid/*"
+        profile-enable: true
+        session-stat-enable: false
+        session-stat-max-count: 1000
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        reset-enable: true
+        login-username: admin
+        login-password: admin123
+      filter:
+        slf4j:
+          connection-log-enabled: false
+          statement-log-enabled: true
+          result-set-log-enabled: false
+          statement-executable-sql-log-enable: true
+          enabled: true
+          statement-sql-pretty-format: true
+          data-source-log-enabled: true
