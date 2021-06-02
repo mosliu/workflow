@@ -6,7 +6,7 @@ spring:
 
   profiles:
     #active: dev
-    include: ds
+    include: ds,redis
     active: dev
 
   devtools:
@@ -17,3 +17,33 @@ spring:
       #additional-paths: src/main/java
       #classpath目录下的WEB-INF文件夹内容修改不重启
       exclude: WEB-INF/**
+#  autoconfigure:
+#    exclude:
+#      - org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration
+  activiti:
+    #1.flase： 默认值。activiti在启动时，会对比数据库表中保存的版本，如果没有表或者版本不匹配，将抛出异常
+    #2.true： activiti会对数据库中所有表进行更新操作。如果表不存在，则自动创建
+    #3.create_drop： 在activiti启动时创建表，在关闭时删除表（必须手动关闭引擎，才能删除表）
+    #4.drop-create： 在activiti启动时删除原来的旧表，然后在创建新表（不需要手动关闭引擎）
+    database-schema-update: true
+    #检测历史表是否存在
+    db-history-used: true
+    #记录历史等级 可配置的历史级别有none, activity, audit, full
+    history-level: full
+    #校验流程文件，默认校验resources下的processes文件夹里的流程文件
+    check-process-definitions: true
+
+
+
+# JWT 认证配置
+jwt:
+  tokenHeader: Authorization   #请求头
+  expiration: 120                #单位(分钟),这里默认2小时
+  tokenHead: "Bearer "
+  sso: false                    #单点登录，是否开启
+  header: jwtHeader   #jwt的请求头
+  secret: eyJleHAiOjE1NDMyMDUyODUsInN1YiI6ImFkbWluIiwiY3Jl   #jwt的加密字符串
+  route:
+    login: /auth/login    #登录地址
+    refresh: /auth/refresh  #刷新token地址
+    register: /auth/register  #注册的地址

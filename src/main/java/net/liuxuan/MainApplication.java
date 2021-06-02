@@ -1,11 +1,10 @@
-package net.liuxuan.workflow;
+package net.liuxuan;
 
 import lombok.extern.slf4j.Slf4j;
 import net.liuxuan.workflow.utils.SpringContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * @author Liuxuan
@@ -16,7 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 //@SpringBootApplication(exclude = {ActivitiSpringIdentityAutoConfiguration.class})
 @SpringBootApplication(scanBasePackages = "net.liuxuan")
 //@SpringBootApplication
-@EnableScheduling
+//@EnableScheduling
 @Slf4j
 public class MainApplication {
     public static void main(String[] args) {

@@ -1,6 +1,11 @@
 # 数据库配置文件
 spring:
   datasource:
+#    url: jdbc:mysql://172.23.16.80:3306/activiti
+#    username: root
+#    password: dz123!@#
+#    driverClassName: com.mysql.cj.jdbc.Driver
+#    type: com.alibaba.druid.pool.DruidDataSource
     primary:
       url: jdbc:mysql://172.23.16.80:3306/flowtest
       username: root

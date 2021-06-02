@@ -1,4 +1,4 @@
-package net.liuxuan.workflow.config;
+package net.liuxuan.db.config;
 /**
  * @author Liuxuan
  * @version v1.0.0
