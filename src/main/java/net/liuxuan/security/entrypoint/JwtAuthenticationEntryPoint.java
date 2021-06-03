@@ -18,7 +18,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException e) throws IOException {
-        String msg = String.format("请求访问：%s，认证失败，无法访问系统资源", request.getRequestURI());
+        String msg = String.format("请求访问：%s，认证失败，无法访问系统资源,%s", request.getRequestURI(),e.getMessage());
         CommonResponseDto responseDto = CommonResponseDto.fail401(msg);
         ServletUtils.renderString(response, JsonUtils.objectToJson(responseDto));
     }

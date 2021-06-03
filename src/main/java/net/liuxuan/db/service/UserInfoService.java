@@ -8,6 +8,8 @@ import net.liuxuan.db.entity.UserInfo;
  * @description Tools for xx use
  * @date 2021-05-31
  **/
-public interface UserInfoService {
+public interface UserInfoService extends BaseService<UserInfo, Integer> {
     UserInfo fetchUserByUserName(String userName);
+
+//    UserInfo saveUser(UserInfo userinfo);
 }

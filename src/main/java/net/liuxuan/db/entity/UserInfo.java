@@ -1,6 +1,7 @@
 package net.liuxuan.db.entity;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -10,6 +11,7 @@ import java.util.Date;
  * 用户信息表
  */
 @Data
+@Accessors(chain = true)
 @Entity
 @Table(name = "UserInfo")
 public class UserInfo implements Serializable {
@@ -35,8 +37,8 @@ public class UserInfo implements Serializable {
     /**
      * 锁定 1锁定 0非锁定
      */
-    @Column(name = "lock")
-    private Integer lock;
+    @Column(name = "islock")
+    private Integer isLock;
     /**
      * 过期时间  空为不过期
      */

@@ -11,12 +11,16 @@ import lombok.extern.slf4j.Slf4j;
 import net.liuxuan.db.entity.UserInfo;
 import net.liuxuan.db.service.UserInfoService;
 import net.liuxuan.security.SecurityUtils;
+import net.liuxuan.security.dto.ButtonDto;
+import net.liuxuan.security.dto.MenuDto;
+import net.liuxuan.security.dto.UserDto;
 import net.liuxuan.security.exception.JwtAuthenticationException;
 import net.liuxuan.security.jwt.JwtToken;
 import net.liuxuan.security.jwt.JwtTokenUtil;
 import net.liuxuan.security.jwt.JwtUser;
 import net.liuxuan.utils.date.LocalTimeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
@@ -32,9 +36,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static net.liuxuan.security.constants.SecurityConstants.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Service
 @Slf4j
@@ -48,6 +55,29 @@ public class LoginServiceImpl implements LoginService {
     @Autowired
     UserInfoService userInfoService;
 
+
+    // 如果在WebSecurityConfigurerAdapter中，没有重新，这里就会报注入失败的异常
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    @Qualifier("jwtUserDetailsService")
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    //    @Override
+//    public String login(String username, String password) throws AuthenticationException {
+//        UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(username, password);
+//        Authentication authentication = authenticationManager.authenticate(upToken);
+//        SecurityContextHolder.getContext().setAuthentication(authentication);
+//        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+//        return jwtTokenUtil.generateToken(userDetails);
+//    }
     @Override
     public UserInfo findByUsername(String username) throws UsernameNotFoundException {
         if (StringUtils.isEmpty(username)) {
@@ -63,7 +93,7 @@ public class LoginServiceImpl implements LoginService {
     }
 
 //    @Override
-//    public SysUserVo findUserInfo(String username) {
+//    public SysUserDto findUserInfo(String username) {
 //        /**
 //         * 获取用户信息
 //         */
@@ -80,8 +110,8 @@ public class LoginServiceImpl implements LoginService {
 //         * 因为权限表是一张表，在这里解析好了以后，
 //         * 相当前端少做一点工作，当然这也可以放到前端去解析权限列表
 //         */
-//        Set<ButtonVo> buttonVos = new HashSet<>();
-//        Set<MenuVo> menuVos = new HashSet<>();
+//        Set<ButtonDto> ButtonDtos = new HashSet<>();
+//        Set<MenuDto> MenuDtos = new HashSet<>();
 //
 //        sysRoles.forEach(role -> {
 //            log.info("role: {}", role.getDescribe());
@@ -90,13 +120,13 @@ public class LoginServiceImpl implements LoginService {
 //                    /*
 //                     * 如果权限是按钮，就添加到按钮里面
 //                     * */
-//                    buttonVos.add(new ButtonVo(permission.getPid(), permission.getResources(), permission.getTitle()));
+//                    ButtonDtos.add(new ButtonDto(permission.getPid(), permission.getResources(), permission.getTitle()));
 //                }
 //                if (permission.getType().toLowerCase().equals("menu")) {
 //                    /*
 //                     * 如果权限是菜单，就添加到菜单里面
 //                     * */
-//                    menuVos.add(new MenuVo(permission.getPid(), permission.getFather(), permission.getIcon(), permission.getResources(), permission.getTitle()));
+//                    MenuDtos.add(new MenuDto(permission.getPid(), permission.getFather(), permission.getIcon(), permission.getResources(), permission.getTitle()));
 //                }
 //            });
 //        });
@@ -105,36 +135,70 @@ public class LoginServiceImpl implements LoginService {
 //         * 注意这个类 TreeBuilder。因为的vue router是以递归的形式呈现菜单
 //         * 所以我们需要把菜单跟vue router 的格式一一对应 而按钮是不需要的
 //         */
-//        SysUserVo sysUserVo =
-//                new SysUserVo(sysUser.getUid(), sysUser.getAvatar(),
+//        SysUserDto sysUserDto =
+//                new SysUserDto(sysUser.getUid(), sysUser.getAvatar(),
 //                        sysUser.getNickname(), sysUser.getUsername(),
 //                        sysUser.getMail(), sysUser.getAddTime(),
-//                        sysUser.getRoles(), buttonVos, TreeBuilder.findRoots(menuVos));
-//        return sysUserVo;
+//                        sysUser.getRoles(), ButtonDtos, TreeBuilder.findRoots(MenuDtos));
+//        return sysUserDto;
 //    }
 
-    // 如果在WebSecurityConfigurerAdapter中，没有重新，这里就会报注入失败的异常
-    @Autowired
-    private AuthenticationManager authenticationManager;
 
-    @Autowired
-    @Qualifier("jwtUserDetailsService")
-    private UserDetailsService userDetailsService;
-
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-//    @Override
-//    public String login(String username, String password) throws AuthenticationException {
-//        UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(username, password);
-//        Authentication authentication = authenticationManager.authenticate(upToken);
-//        SecurityContextHolder.getContext().setAuthentication(authentication);
-//        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-//        return jwtTokenUtil.generateToken(userDetails);
-//    }
+    @Override
+    public UserDto findUserInfo() {
+        // 从SecurityContextHolder中获取到，当前登录的用户信息。
+        JwtUser userDetails = SecurityUtils.getLoginUser();
+        // 根据用户Id，获取用户详细信息。
+        UserInfo sysUser = userInfoService.findById(userDetails.getUid());
+        UserDto result = new UserDto();
+        BeanUtils.copyProperties(sysUser, result);
+        // 根据用户Id，获取到拥有的 权限列表
+//        Set<SysPermission> permissions = sysPermissionService.findAllByUserId(sysUser.getUid());
+        List<ButtonDto> buttonDtos = new ArrayList<>();
+        List<MenuDto> menuDtos = new ArrayList<>();
+//        if (permissions != null && permissions.size() > 1) {
+//            permissions.forEach(permission -> {
+//                if (permission.getType().toLowerCase().equals(PermissionType.BUTTON)) {
+//                    /*
+//                     * 如果权限是按钮，就添加到按钮里面
+//                     * */
+//                    buttonDtos.add(
+//                            new ButtonDto(
+//                                    permission.getPid(),
+//                                    permission.getResources(),
+//                                    permission.getTitle())
+//                    );
+//                }
+//                if (permission.getType().toLowerCase().equals(PermissionType.MENU)) {
+//                    /*
+//                     * 如果权限是菜单，就添加到菜单里面
+//                     * */
+//                    menuDtos.add(
+//                            new MenuDto(
+//                                    permission.getPid(),
+//                                    permission.getParentId(),
+//                                    permission.getIcon(),
+//                                    permission.getResources(),
+//                                    permission.getTitle(),
+//                                    null
+//                            )
+//                    );
+//                }
+//            });
+//        }
+        result.setButtons(buttonDtos);
+//        result.setMenus(findRoots(menuDtos));
+        result.setMenus(menuDtos);
+//        Set<SysRole> roles = sysRoleService.findAllByUserId(result.getUid());
+//        Set<String> rolesName = roles
+//                .stream()
+//                .map(r -> r.getDescription())
+//                .collect(Collectors.toSet());
+//        String departmentName = sysDepartmentService.findById(sysUser.getDeptId()).getName();
+//        result.setDepartmentName(departmentName);
+//        result.setRoles(rolesName);
+        return result;
+    }
 
     @Override
     public JwtToken login(String username, String password) throws AuthenticationException {
@@ -159,6 +223,28 @@ public class LoginServiceImpl implements LoginService {
                 .build();
     }
 
+    @Override
+    public JwtToken register(String username, String password) throws AuthenticationException {
+        //TODO 不应该用AuthenticationEx
+        if (isBlank(username)) {
+            throw new UsernameNotFoundException(String.format("'%s'.用户名校验错误", username));
+        }
+        if (isBlank(password)) {
+            throw new UsernameNotFoundException(String.format("'%s'.密码不合理", password));
+        }
+        UserInfo userInfo = userInfoService.fetchUserByUserName(username);
+        if (userInfo != null) {
+            throw new UsernameNotFoundException(String.format("'%s'.用户名已存在", username));
+        }
+        UserInfo newUser = new UserInfo();
+        String sec_password = passwordEncoder.encode(password);
+        log.info("gen pass for {}:  {}", password, sec_password);
+        newUser.setName(username).setPassword(sec_password).setActive(1).setIsLock(0);
+
+//        newUser = userInfoService.saveUser(newUser);
+        newUser = userInfoService.save(newUser);
+        return login(username, password);
+    }
 
 //    @Override
 //    public Integer register(UserInfo userInfo) throws UserExistsException {
@@ -231,6 +317,7 @@ public class LoginServiceImpl implements LoginService {
                 .opsForValue().get(LOGIN_TOKEN_KEY + loginId);
         return loginUser;
     }
+
     private void removeLoginUser(String loginId) {
         redisTemplate.delete(loginId);
     }
@@ -275,5 +362,12 @@ public class LoginServiceImpl implements LoginService {
                     TimeUnit.MINUTES
             );
         }
+    }
+
+    @Override
+    public void logout() {
+        JwtUser loginUser = SecurityUtils.getLoginUser();
+        // 移除登录的用户。根据tokenId
+        removeLoginUser(loginUser.getLoginId());
     }
 }
