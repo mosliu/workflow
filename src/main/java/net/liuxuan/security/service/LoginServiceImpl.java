@@ -8,7 +8,11 @@ package net.liuxuan.security.service;
  **/
 
 import lombok.extern.slf4j.Slf4j;
+import net.liuxuan.constants.MenuType;
+import net.liuxuan.db.entity.Menu;
 import net.liuxuan.db.entity.UserInfo;
+import net.liuxuan.db.service.MenuService;
+import net.liuxuan.db.service.RoleInfoService;
 import net.liuxuan.db.service.UserInfoService;
 import net.liuxuan.security.SecurityUtils;
 import net.liuxuan.security.dto.ButtonDto;
@@ -18,9 +22,9 @@ import net.liuxuan.security.exception.JwtAuthenticationException;
 import net.liuxuan.security.jwt.JwtToken;
 import net.liuxuan.security.jwt.JwtTokenUtil;
 import net.liuxuan.security.jwt.JwtUser;
+import net.liuxuan.utils.TreeUtils;
 import net.liuxuan.utils.date.LocalTimeUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
@@ -38,9 +42,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
-import static net.liuxuan.security.constants.SecurityConstants.*;
+import static net.liuxuan.constants.SecurityConstants.*;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Service
@@ -55,6 +61,11 @@ public class LoginServiceImpl implements LoginService {
     @Autowired
     UserInfoService userInfoService;
 
+    @Autowired
+    RoleInfoService roleInfoService;
+
+    @Autowired
+    MenuService menuService;
 
     // 如果在WebSecurityConfigurerAdapter中，没有重新，这里就会报注入失败的异常
     @Autowired
@@ -151,44 +162,29 @@ public class LoginServiceImpl implements LoginService {
         // 根据用户Id，获取用户详细信息。
         UserInfo sysUser = userInfoService.findById(userDetails.getUid());
         UserDto result = new UserDto();
-        BeanUtils.copyProperties(sysUser, result);
+//        BeanUtils.copyProperties(sysUser, result);
+        result.setUid(sysUser.getId()).setUsername(sysUser.getName());
         // 根据用户Id，获取到拥有的 权限列表
 //        Set<SysPermission> permissions = sysPermissionService.findAllByUserId(sysUser.getUid());
         List<ButtonDto> buttonDtos = new ArrayList<>();
         List<MenuDto> menuDtos = new ArrayList<>();
-//        if (permissions != null && permissions.size() > 1) {
-//            permissions.forEach(permission -> {
-//                if (permission.getType().toLowerCase().equals(PermissionType.BUTTON)) {
-//                    /*
-//                     * 如果权限是按钮，就添加到按钮里面
-//                     * */
-//                    buttonDtos.add(
-//                            new ButtonDto(
-//                                    permission.getPid(),
-//                                    permission.getResources(),
-//                                    permission.getTitle())
-//                    );
-//                }
-//                if (permission.getType().toLowerCase().equals(PermissionType.MENU)) {
-//                    /*
-//                     * 如果权限是菜单，就添加到菜单里面
-//                     * */
-//                    menuDtos.add(
-//                            new MenuDto(
-//                                    permission.getPid(),
-//                                    permission.getParentId(),
-//                                    permission.getIcon(),
-//                                    permission.getResources(),
-//                                    permission.getTitle(),
-//                                    null
-//                            )
-//                    );
-//                }
-//            });
-//        }
+//        menuDtos.add(new MenuDto().setTitle("A").setPid(1).setParentId(0).setResources("pre"));
+        List<Menu> allMenu = menuService.findAll();
+        if (allMenu != null && allMenu.size() > 1) {
+            allMenu.forEach(menu -> {
+                if (menu.getType().toLowerCase().equals(MenuType.BUTTON)) {
+                    //如果权限是按钮，就添加到按钮里面
+                    buttonDtos.add(menu.toButtonDto());
+                }
+                if (menu.getType().toLowerCase().equals(MenuType.MENU)) {
+                    //如果权限是按钮，就添加到按钮里面
+                    menuDtos.add(menu.toMenuDto());
+                }
+            });
+        }
         result.setButtons(buttonDtos);
-//        result.setMenus(findRoots(menuDtos));
-        result.setMenus(menuDtos);
+        result.setMenus(TreeUtils.findRoot(menuDtos));
+//        result.setMenus(menuDtos);
 //        Set<SysRole> roles = sysRoleService.findAllByUserId(result.getUid());
 //        Set<String> rolesName = roles
 //                .stream()
@@ -196,7 +192,9 @@ public class LoginServiceImpl implements LoginService {
 //                .collect(Collectors.toSet());
 //        String departmentName = sysDepartmentService.findById(sysUser.getDeptId()).getName();
 //        result.setDepartmentName(departmentName);
-//        result.setRoles(rolesName);
+        Set<String> rolesName = new TreeSet<>();
+        rolesName.add("ROLE_ADMIN");
+        result.setRoles(rolesName);
         return result;
     }
 
@@ -213,7 +211,7 @@ public class LoginServiceImpl implements LoginService {
         String token = jwtTokenUtil.createToken(loginId);
         log.debug("userDetails: {}", userDetails);
 
-//        setLoginUser(loginId, userDetails);
+        setLoginUser(loginId, (JwtUser) userDetails);
 
         return JwtToken.builder()
                 .header(jwtTokenUtil.getTokenHeader())

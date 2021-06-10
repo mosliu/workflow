@@ -57,6 +57,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
         // 从这里开始获取 request 中的 jwt token
         // 获取 Request 中的请求头为 “ Authorization ” 的 token 值
+        log.info("Request 请求：{}",request.getRequestURI());
         String tokenHeader = jwtTokenUtil.getTokenHeader();
         tokenHeader = isBlank(tokenHeader)?"Authorization":tokenHeader;
         String bearerToken = request.getHeader(tokenHeader);

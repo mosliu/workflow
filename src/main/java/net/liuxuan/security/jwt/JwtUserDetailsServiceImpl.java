@@ -34,9 +34,9 @@ public class JwtUserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException(String.format("'%s'.传入的用户名错误", username));
         }
         // 根据用户名获取数据库的用户信息
-        UserInfo tmpUI = new UserInfo().setName(username);
-        UserInfo userInfo1 = userInfoService.find(tmpUI);
-        log.info("{}" ,userInfo1);
+//        UserInfo tmpUI = new UserInfo().setName(username);
+//        UserInfo userInfo1 = userInfoService.find(tmpUI);
+//        log.info("{}" ,userInfo1);
         UserInfo userInfo = userInfoService.fetchUserByUserName(username);
         if (userInfo == null) {
             throw new UsernameNotFoundException(String.format("'%s'.这个用户不存在", username));
@@ -45,7 +45,7 @@ public class JwtUserDetailsServiceImpl implements UserDetailsService {
 //            List<SimpleGrantedAuthority> collect = sysUser.getRoles().stream().map(SysRole::getName).map(SimpleGrantedAuthority::new).collect(Collectors.toList());
             List<SimpleGrantedAuthority> collect = new ArrayList<>();
             JwtUser jwtUser = new JwtUser();
-            jwtUser.setUsername(userInfo.getName()).setPassword(userInfo.getPassword()).setAuthorities(collect).setStatus(userInfo.getActive());
+            jwtUser.setUsername(userInfo.getName()).setPassword(userInfo.getPassword()).setAuthorities(collect).setStatus(userInfo.getActive()).setUid(userInfo.getId());
 
             return jwtUser;
         }

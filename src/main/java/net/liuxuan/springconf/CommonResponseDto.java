@@ -93,6 +93,9 @@ public class CommonResponseDto {
         return dto;
     }
 
+    public static CommonResponseDto failCommon(Object data) {
+        return fail(RtnDtoCode.FailCommon, data);
+    }
     public static CommonResponseDto fail401(Object data) {
         return fail(RtnDtoCode.Fail401, data);
     }

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.TimeUnit;
 
-import static net.liuxuan.security.constants.SecurityConstants.CAPTCHA_CODE_KEY;
+import static net.liuxuan.constants.SecurityConstants.CAPTCHA_CODE_KEY;
 
 /**
  * @author Liuxuan
@@ -44,7 +44,7 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
         // 获取服务器的 CodeText
         String serverCodeText = redisTemplate.opsForValue().get(CAPTCHA_CODE_KEY + codeKey);
         // 将 serverCodeText 和 user.codeText 都转换成小写，然后比较
-        if (serverCodeText.equals(userCodeText.toUpperCase())) {
+        if (serverCodeText != null && serverCodeText.equals(userCodeText.toUpperCase())) {
             return true;
         } else {
             return false;

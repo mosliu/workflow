@@ -1,14 +1,21 @@
 package net.liuxuan.db.entity;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 用户组信息表
  */
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
+@EqualsAndHashCode(exclude = {"userInfos","roleInfos"})
+@ToString(exclude = {"userInfos","roleInfos"})
 @Entity
 @Table(name = "UserGroup")
 public class UserGroup implements Serializable {
@@ -31,5 +38,26 @@ public class UserGroup implements Serializable {
      */
     @Column(name = "parentId")
     private Integer parentId;
+    /**
+     * 部门排序
+     */
+    @Column(name = "level", columnDefinition = "TINYINT")
+    private Integer level;
+    /**
+     * 部门描述
+     */
+    @Column(name = "description")
+    private String description;
+
+    @JsonIgnoreProperties(value = "userGroups")
+    @ManyToMany(mappedBy = "userGroups")  //配置多表关系
+    private Set<UserInfo> userInfos = new HashSet<>();
+
+    @JsonIgnoreProperties(value = "userGroups")
+    @JoinTable(name = "UserGroup_RoleInfo",
+            joinColumns = {@JoinColumn(name = "groupId", referencedColumnName = "ID")},
+            inverseJoinColumns = {@JoinColumn(name = "roleId", referencedColumnName = "ID")})
+    @ManyToMany(targetEntity = RoleInfo.class, cascade = CascadeType.ALL)
+    private Set<RoleInfo> roleInfos = new HashSet<>();
 
 }

@@ -22,6 +22,7 @@ public enum RtnDtoCode {
 
     INPUTALLEMPTY(-100, "用户输入属性域全部为空"),
     Fail401(-401,"未认证"),
+    FailCommon(-100,"失败！"),
     Fail403(-403,"禁止访问"),
     Fail404(-404,"页面失联")
     ;

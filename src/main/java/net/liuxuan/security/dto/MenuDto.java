@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import net.liuxuan.utils.TreeNode;
 
 import java.util.List;
 
@@ -23,7 +24,7 @@ import java.util.List;
 @Accessors(chain = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class MenuDto implements java.io.Serializable {
+public class MenuDto implements java.io.Serializable, TreeNode {
 
     private Integer pid;
 
@@ -37,4 +38,22 @@ public class MenuDto implements java.io.Serializable {
 
     private List<MenuDto> children;
 
+    @Override
+    public boolean isRoot() {
+        return parentId == 0;
+    }
+
+//    public List<TreeNode> getChildren() {
+//        return ( List<TreeNode> )children;
+//    }
+
+    @Override
+    public void setChildren(List children) {
+        this.children = children;
+    }
+
+    @Override
+    public Integer getId() {
+        return null;
+    }
 }

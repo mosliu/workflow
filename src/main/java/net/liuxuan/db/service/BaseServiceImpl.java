@@ -37,10 +37,15 @@ public class BaseServiceImpl<T, ID, R extends JpaRepository<T, ID>> implements B
 //    }
 
     @Override
+    public List<T> findAll() {
+        return repository.findAll();
+    }
+
+    @Override
     public List<T> findAll(T entity) {
         log.info("findAll entity: {}", entity);
         if (entity == null) {
-            repository.findAll();
+            return repository.findAll();
         }
         return findAll(entity, null);
 //        return repository.select(entity);
@@ -50,7 +55,7 @@ public class BaseServiceImpl<T, ID, R extends JpaRepository<T, ID>> implements B
     public List<T> findAll(T entity, ExampleMatcher matcher) {
 
         if (entity == null) {
-            repository.findAll();
+            return repository.findAll();
         }
         if (matcher == null) {
             matcher = ExampleMatcher.matching() //构建对象
@@ -158,7 +163,7 @@ public class BaseServiceImpl<T, ID, R extends JpaRepository<T, ID>> implements B
 
 //        log.info("count entity: {}", entity);
 //        return repository.selectCount(entity);
-        return  count(entity,null);
+        return count(entity, null);
     }
 
     @Override
@@ -186,7 +191,7 @@ public class BaseServiceImpl<T, ID, R extends JpaRepository<T, ID>> implements B
     @Override
     public boolean existsWithPrimaryKey(ID id) {
         log.info("existsWithPrimaryKey id: {}", id);
-        return  repository.existsById(id);
+        return repository.existsById(id);
 //        return repository.existsWithPrimaryKey(id);
     }
 }

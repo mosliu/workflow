@@ -1,4 +1,4 @@
-package net.liuxuan.security.constants;
+package net.liuxuan.constants;
 
 /**
  * @author Liuxuan

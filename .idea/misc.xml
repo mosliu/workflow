@@ -11,6 +11,7 @@
       </list>
     </option>
   </component>
+  <component name="ProjectRedsoftYApiUpload" url="http://127.0.0.1:3000" project-id="10" token="6dd76ee6827ccae663ce31da31f7f647cc042188f05526d018162c747b8472d2" data-mode="0" property-naming-strategy="0" enable-basic-scope="false" />
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" project-jdk-name="11" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>

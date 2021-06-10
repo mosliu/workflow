@@ -56,7 +56,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
 
-
     @Autowired
     private JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
@@ -128,7 +127,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 //                .antMatchers("/wuzz/test4","/code/*").permitAll() //不需要保护的资源，可以多个
 //                .antMatchers("/wuzz/**").authenticated()// 需要认证得资源，可以多个
-                .antMatchers("/druid/**","/actuator/**","/auth/**").permitAll()
+                .antMatchers("/druid/**", "/actuator/**", "/auth/**", "/verify/code/**").permitAll()
+                .antMatchers("/favicon.ico").permitAll()
                 .antMatchers(HttpMethod.POST, "/user/login").permitAll()
 //                .antMatchers(HttpMethod.POST, "/auth/**").permitAll()
                 .anyRequest().authenticated()

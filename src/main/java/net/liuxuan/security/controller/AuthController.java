@@ -1,17 +1,26 @@
 package net.liuxuan.security.controller;
 
+import lombok.extern.slf4j.Slf4j;
+import net.liuxuan.db.entity.Menu;
+import net.liuxuan.db.entity.Privilege;
+import net.liuxuan.db.service.MenuService;
+import net.liuxuan.db.service.PrivilegeService;
 import net.liuxuan.security.jwt.JwtToken;
 import net.liuxuan.security.service.LoginService;
 import net.liuxuan.security.service.VerifyCodeService;
 import net.liuxuan.springconf.CommonResponseDto;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Liuxuan
@@ -21,6 +30,7 @@ import java.util.Map;
  **/
 
 @RestController
+@Slf4j
 public class AuthController {
     @Autowired
     LoginService loginService;
@@ -30,14 +40,30 @@ public class AuthController {
 
     @PostMapping(value = "${jwt.route.login}")
     public CommonResponseDto login(@RequestBody Map<String, String> map) {
+
+        if (false && !verifyCodeService.checkVerifyCode(map.get("codeKey"), map.get("codeText"))) {
+            return CommonResponseDto.failCommon("验证码错误！");
+        }
+
         String username = map.get("username");
         String password = map.get("password");
         if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
             return CommonResponseDto.fail401("用户或者密码不能为空！");
 //            return Result.error401("用户或者密码不能为空！", null);
         }
-        JwtToken login = loginService.login(username, password);
-        return CommonResponseDto.success("登录成功", login);
+        try {
+            JwtToken login = loginService.login(username, password);
+            // 登录成功后，就从 redis 中删除验证码
+            verifyCodeService.deleteImageVerifyCode(map.get("codeKey"));
+            return CommonResponseDto.success("登录成功", login);
+        } catch (LockedException ex) {
+            log.error(ex.getMessage());
+            return CommonResponseDto.failCommon("此用户被锁定！暂时无法登录，请联系管理员！");
+        } catch (AuthenticationException ex) {
+            log.error(ex.getMessage());
+            return CommonResponseDto.failCommon("用户名或密码错误");
+        }
+
     }
 //
 //    @PostMapping(value = "${jwt.route.refresh}")
@@ -100,6 +126,33 @@ public class AuthController {
                 "JPEG",
                 response.getOutputStream()
         );
+    }
+
+    @Autowired
+    MenuService menuService;
+
+    @Autowired
+    PrivilegeService privilegeService;
+
+    @GetMapping(value = "/auth/1")
+    public CommonResponseDto test1() {
+        Menu menu = menuService.findAll().get(2);
+        Privilege newP = new Privilege();
+        newP.setName("Ca");
+
+        menu.getPrivileges().add(newP);
+        Privilege privilege = privilegeService.findAll().get(0);
+        menu.getPrivileges().add(privilege);
+        Menu save = menuService.save(menu);
+
+        Set<Menu> menus = privilege.getMenus();
+        HashMap rtnMap = new HashMap();
+        rtnMap.put("menu",save);
+        rtnMap.put("menus",menus);
+        rtnMap.put("priv",privilege);
+
+
+        return CommonResponseDto.success("成功", rtnMap);
     }
 
 

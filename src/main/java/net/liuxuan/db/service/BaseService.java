@@ -27,6 +27,8 @@ public interface BaseService<T, ID> {
 //    PageInfo<T> findAllPage(QueryParameter parameter);
 
 
+    List<T> findAll();
+
     List<T> findAll(T entity);
     /**
      * 查看所有数据，根据条件查询
