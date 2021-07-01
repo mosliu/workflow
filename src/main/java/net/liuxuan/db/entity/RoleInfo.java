@@ -1,5 +1,6 @@
 package net.liuxuan.db.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
@@ -36,16 +37,19 @@ public class RoleInfo implements Serializable {
     private String description;
 
     @JsonIgnoreProperties(value = "roleInfos")
+    @JsonIgnore
     @ManyToMany(mappedBy = "roleInfos")  //配置多表关系
     private Set<UserInfo> userInfos = new HashSet<>();
 
     //两个一样的，可能会出问题。
     @JsonIgnoreProperties(value = "roleInfos")
+    @JsonIgnore
     @ManyToMany(mappedBy = "roleInfos")  //配置多表关系
     private Set<UserGroup> userGroups = new HashSet<>();
 
 
     @JsonIgnoreProperties(value = "roleInfos")
+    @JsonIgnore
     @JoinTable(name = "RoleInfo_Privilege",
             joinColumns = {@JoinColumn(name = "roleId", referencedColumnName = "ID")},
             inverseJoinColumns = {@JoinColumn(name = "privilegeId", referencedColumnName = "ID")})

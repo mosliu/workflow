@@ -93,12 +93,24 @@ public class CommonResponseDto {
         return dto;
     }
 
+    /**
+     * 异常失败
+     *
+     * @param data
+     * @return
+     */
+    public static CommonResponseDto fail(Object data) {
+        return fail(RtnDtoCode.EXCEPTIONS, data);
+    }
+
     public static CommonResponseDto failCommon(Object data) {
         return fail(RtnDtoCode.FailCommon, data);
     }
+
     public static CommonResponseDto fail401(Object data) {
         return fail(RtnDtoCode.Fail401, data);
     }
+
     public static CommonResponseDto fail403(Object data) {
         return fail(RtnDtoCode.Fail403, data);
     }

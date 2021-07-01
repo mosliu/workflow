@@ -55,23 +55,22 @@ public class Menu implements Serializable {
 
     /**
      * 配置用户到角色的多对多关系
-     *      配置多对多的映射关系
-     *          1.声明表关系的配置
-     *              @ManyToMany(targetEntity = Role.class)  //多对多
-     *                  targetEntity：代表对方的实体类字节码
-     *          2.配置中间表（包含两个外键）
-     *                @JoinTable
-     *                  name : 中间表的名称
-     *                  joinColumns：配置当前对象在中间表的外键
-     *                      @JoinColumn的数组
-     *                          name：外键名
-     *                          referencedColumnName：参照的主表的主键名
-     *                  inverseJoinColumns：配置对方对象在中间表的外键
+     * 配置多对多的映射关系
+     * 1.声明表关系的配置
+     *
+     * @ManyToMany(targetEntity = Role.class)  //多对多
+     * targetEntity：代表对方的实体类字节码
+     * 2.配置中间表（包含两个外键）
+     * @JoinTable name : 中间表的名称
+     * joinColumns：配置当前对象在中间表的外键
+     * @JoinColumn的数组 name：外键名
+     * referencedColumnName：参照的主表的主键名
+     * inverseJoinColumns：配置对方对象在中间表的外键
      */
     @JsonIgnoreProperties(value = "menus")
-    @JoinTable(name="Menu_Privilege",
-            joinColumns={@JoinColumn(name="menuId", referencedColumnName="ID")},
-            inverseJoinColumns={@JoinColumn(name="privilegeId", referencedColumnName="ID")})
+    @JoinTable(name = "Menu_Privilege",
+            joinColumns = {@JoinColumn(name = "menuId", referencedColumnName = "ID")},
+            inverseJoinColumns = {@JoinColumn(name = "privilegeId", referencedColumnName = "ID")})
     @ManyToMany(targetEntity = Privilege.class, cascade = CascadeType.ALL)
     private Set<Privilege> privileges = new HashSet<>();
 
@@ -91,5 +90,10 @@ public class Menu implements Serializable {
         dto.setIcon(this.getIcon());
         dto.setParentId(this.getParentId());
         return dto;
+    }
+
+    public Set<Privilege> getPrivileges() {
+        if (privileges == null) privileges = new HashSet<>();
+        return privileges;
     }
 }

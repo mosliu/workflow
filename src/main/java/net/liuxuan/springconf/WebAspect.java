@@ -9,6 +9,8 @@ import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -66,6 +68,26 @@ public class WebAspect {
 //        webLog.setResult(result);
         sb.append("CostTime:").append((int) (endTime - startTime)).append(",");
         log.info(sb.toString());
+
+        /**
+         * 添加validation输出
+         */
+        Object[] args = joinPoint.getArgs();
+        for (Object arg : args) {
+            if (arg instanceof BindingResult) {
+                BindingResult br = (BindingResult) arg;
+                if (br.hasErrors()) {
+                    FieldError fieldError = br.getFieldError();
+                    if (fieldError != null) {
+                        return CommonResponseDto.fail(fieldError.getDefaultMessage());
+                    } else {
+                        return CommonResponseDto.fail("请求参数错误！");
+                    }
+                }
+            }
+        }
+
+
         return result;
     }
 

@@ -1,5 +1,6 @@
 package net.liuxuan.db.service;
 
+import net.liuxuan.common.BaseService;
 import net.liuxuan.db.entity.Function;
 
 /**
@@ -8,5 +9,5 @@ import net.liuxuan.db.entity.Function;
  * @description Tools for xx use
  * @date 2021-06-03
  **/
-public interface FunctionService extends BaseService<Function, Integer>{
+public interface FunctionService extends BaseService<Function, Integer> {
 }

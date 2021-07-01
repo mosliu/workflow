@@ -1,9 +1,9 @@
-package net.liuxuan.db.service;
+package net.liuxuan.common;
 
 import lombok.extern.slf4j.Slf4j;
+import net.liuxuan.db.page.PageParameter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +41,17 @@ public class BaseServiceImpl<T, ID, R extends JpaRepository<T, ID>> implements B
         return repository.findAll();
     }
 
+
+    @Override
+    public Iterable<T> findAll(Sort sort) {
+        return repository.findAll(sort);
+    }
+
+    @Override
+    public Page<T> findAll(Pageable pageable) {
+        return repository.findAll(pageable);
+    }
+
     @Override
     public List<T> findAll(T entity) {
         log.info("findAll entity: {}", entity);
@@ -73,16 +84,40 @@ public class BaseServiceImpl<T, ID, R extends JpaRepository<T, ID>> implements B
     }
 
     @Override
+    public Page<T> findAllPage(PageParameter parameter) {
+        log.info("findAll parameter: {}", parameter);
+        int pageNum = parameter.getPageNum() - 1;
+        pageNum = pageNum < 0 ? 0 : pageNum;
+        parameter.setPageNum(pageNum);
+
+        Pageable of = PageRequest.of(parameter.getPageNum(), parameter.getPageSize());
+        Page<T> all = repository.findAll(of);
+//        PageInfo<T> pageInfo = PageHelper
+//                .startPage(parameter.getPageNum(), parameter.getPageSize())
+//                .doSelectPageInfo(() -> baseMapper.selectAll());
+        return all;
+    }
+
+    @Override
     public T findById(ID id) {
         log.info("findById id: {}", id);
+        if (id == null) {
+            return null;
+        }
         return repository.findById(id).orElse(null);
 //        return repository.selectByPrimaryKey(id);
     }
+
 
     @Override
     public T find(T entity) {
 //        if (entity == null) return null;
         return find(entity, null);
+    }
+
+    @Override
+    public Iterable<T> findAllById(Iterable<ID> ids) {
+        return repository.findAllById(ids);
     }
 
     @Override
@@ -168,7 +203,10 @@ public class BaseServiceImpl<T, ID, R extends JpaRepository<T, ID>> implements B
 
     @Override
     public long count(T entity, ExampleMatcher matcher) {
-        if (entity == null) return 0;
+        if (entity == null) {
+            return repository.count();
+//            return 0;
+        }
 
         if (matcher == null) {
             matcher = ExampleMatcher.matching() //构建对象

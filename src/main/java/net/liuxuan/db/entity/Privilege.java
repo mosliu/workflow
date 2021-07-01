@@ -27,6 +27,21 @@ public class Privilege implements Serializable {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "pid")
+    private Integer pid;
+
+    /**
+     * 描述
+     */
+    @Column(name = "description")
+    private String description;
+
+    /**
+     * 类型：菜单 menu，角色 role 等等
+     */
+    @Column(name = "type")
+    private String type;
+
     @JsonIgnoreProperties(value = "privileges")
     @ManyToMany(mappedBy = "privileges")  //配置多表关系
     private Set<Menu> menus = new HashSet<>();

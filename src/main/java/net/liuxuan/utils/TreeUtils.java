@@ -17,7 +17,7 @@ public class TreeUtils {
      * @param allNodes
      * @return Set<TreeNode>
      */
-    public static <T extends TreeNode> List<T> findRoot(List<T> allNodes) {
+    public static <T extends ITreeNode> List<T> findRoot(List<T> allNodes) {
         // 根节点
         List<T> root = new ArrayList<>();
         allNodes.forEach(node -> {
@@ -39,9 +39,11 @@ public class TreeUtils {
      * @param treeNodes
      * @return TreeNode
      */
-    private static <T extends TreeNode> T findChildren(T treeNode, List<T> treeNodes) {
+    private static <T extends ITreeNode> T findChildren(T treeNode, List<T> treeNodes) {
         for (T it : treeNodes) {
-            if (treeNode.getId() == it.getParentId()) {
+            long a = treeNode.getId().longValue();
+            long b = it.getParentId().longValue();
+            if (a == b) {
                 if (treeNode.getChildren() == null) {
                     treeNode.setChildren(new ArrayList<>());
                 }

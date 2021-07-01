@@ -1,4 +1,4 @@
-package net.liuxuan.redis;
+package net.liuxuan.cache;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;

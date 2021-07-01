@@ -9,5 +9,11 @@
       <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
       <jdbc-url>jdbc:mysql://172.23.16.80:3306/activiti</jdbc-url>
     </data-source>
+    <data-source source="LOCAL" name="@172.23.16.64" uuid="8516b128-494c-4817-8c0b-dec7681652b3">
+      <driver-ref>mariadb</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.mariadb.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mariadb://172.23.16.64:3306</jdbc-url>
+    </data-source>
   </component>
 </project>

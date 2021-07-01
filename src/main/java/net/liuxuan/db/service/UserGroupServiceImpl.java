@@ -1,6 +1,7 @@
 package net.liuxuan.db.service;
 
 import lombok.extern.slf4j.Slf4j;
+import net.liuxuan.common.BaseServiceImpl;
 import net.liuxuan.db.entity.UserGroup;
 import net.liuxuan.db.repository.UserGroupRepository;
 import org.springframework.stereotype.Service;

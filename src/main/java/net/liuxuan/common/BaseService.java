@@ -1,6 +1,10 @@
-package net.liuxuan.db.service;
+package net.liuxuan.common;
 
+import net.liuxuan.db.page.PageParameter;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
@@ -29,6 +33,10 @@ public interface BaseService<T, ID> {
 
     List<T> findAll();
 
+    Iterable<T> findAll(Sort sort);
+
+    Page<T> findAll(Pageable pageable);
+
     List<T> findAll(T entity);
     /**
      * 查看所有数据，根据条件查询
@@ -38,6 +46,8 @@ public interface BaseService<T, ID> {
      * @return List<T>
      */
     List<T> findAll(T entity, ExampleMatcher matcher);
+
+    Page<T> findAllPage(PageParameter parameter);
 
     /**
      * 根据ID查询数据
@@ -54,6 +64,9 @@ public interface BaseService<T, ID> {
      * @return T
      */
     T find(T entity);
+
+    Iterable<T> findAllById(Iterable<ID> ids);
+
     /**
      * 根据条件查询，只返回一条数据
      *

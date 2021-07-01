@@ -1,5 +1,6 @@
 package net.liuxuan.db.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -55,6 +56,7 @@ public class UserInfo implements Serializable {
      * 密码
      */
     @Column(name = "password")
+    @JsonIgnore
     private String password;
 
     @JsonIgnoreProperties(value = "userInfos")
@@ -70,5 +72,9 @@ public class UserInfo implements Serializable {
             inverseJoinColumns = {@JoinColumn(name = "roleId", referencedColumnName = "ID")})
     @ManyToMany(targetEntity = RoleInfo.class, cascade = CascadeType.ALL)
     private Set<RoleInfo> roleInfos = new HashSet<>();
+
+//    @OneToOne(cascade=CascadeType.ALL)//People是关系的维护端，当删除 people，会级联删除 address
+//    @JoinColumn(name = "uid", referencedColumnName = "uid")//people中的address_id字段参考address表中的id字段
+//    private UserDetailsEntity userDetailsEntity;//地址
 
 }

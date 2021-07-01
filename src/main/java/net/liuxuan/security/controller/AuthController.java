@@ -1,14 +1,15 @@
 package net.liuxuan.security.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import net.liuxuan.db.entity.Menu;
-import net.liuxuan.db.entity.Privilege;
+import net.liuxuan.db.service.ChinaAreaService;
 import net.liuxuan.db.service.MenuService;
 import net.liuxuan.db.service.PrivilegeService;
 import net.liuxuan.security.jwt.JwtToken;
 import net.liuxuan.security.service.LoginService;
 import net.liuxuan.security.service.VerifyCodeService;
 import net.liuxuan.springconf.CommonResponseDto;
+import net.liuxuan.utils.TreeNode;
+import net.liuxuan.utils.TreeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.LockedException;
@@ -18,9 +19,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Liuxuan
@@ -134,25 +135,38 @@ public class AuthController {
     @Autowired
     PrivilegeService privilegeService;
 
+
+    @Autowired
+    private ChinaAreaService chinaAreaService;
+
     @GetMapping(value = "/auth/1")
     public CommonResponseDto test1() {
-        Menu menu = menuService.findAll().get(2);
-        Privilege newP = new Privilege();
-        newP.setName("Ca");
-
-        menu.getPrivileges().add(newP);
-        Privilege privilege = privilegeService.findAll().get(0);
-        menu.getPrivileges().add(privilege);
-        Menu save = menuService.save(menu);
-
-        Set<Menu> menus = privilege.getMenus();
-        HashMap rtnMap = new HashMap();
-        rtnMap.put("menu",save);
-        rtnMap.put("menus",menus);
-        rtnMap.put("priv",privilege);
-
-
-        return CommonResponseDto.success("成功", rtnMap);
+        List<TreeNode> collect = chinaAreaService.findAll()
+                .stream()
+                .distinct()
+                .map(res -> {
+                    return new TreeNode().setId(res.getAreaCode()).setParentId(res.getParentCode()).setSource(res).setName(res.getName());
+                })
+                .collect(Collectors.toList());
+        List<TreeNode> root = TreeUtils.findRoot(collect);
+        return CommonResponseDto.success(root);
+//        Menu menu = menuService.findAll().get(2);
+//        Privilege newP = new Privilege();
+//        newP.setName("Ca");
+//
+//        menu.getPrivileges().add(newP);
+//        Privilege privilege = privilegeService.findAll().get(0);
+//        menu.getPrivileges().add(privilege);
+//        Menu save = menuService.save(menu);
+//
+//        Set<Menu> menus = privilege.getMenus();
+//        HashMap rtnMap = new HashMap();
+//        rtnMap.put("menu",save);
+//        rtnMap.put("menus",menus);
+//        rtnMap.put("priv",privilege);
+//
+//
+//        return CommonResponseDto.success("成功", rtnMap);
     }
 
 

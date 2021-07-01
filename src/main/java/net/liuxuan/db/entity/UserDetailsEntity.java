@@ -1,18 +1,20 @@
 package net.liuxuan.db.entity;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
-import java.sql.Date;
+import java.util.Date;
 
 @Data
 @Entity
 @Table(name = "UserDetails")
-public class UserDetails implements Serializable {
+@Accessors(chain = true)
+public class UserDetailsEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

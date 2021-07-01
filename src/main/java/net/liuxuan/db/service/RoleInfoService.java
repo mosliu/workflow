@@ -1,5 +1,6 @@
 package net.liuxuan.db.service;
 
+import net.liuxuan.common.BaseService;
 import net.liuxuan.db.entity.RoleInfo;
 
 /**
@@ -8,5 +9,5 @@ import net.liuxuan.db.entity.RoleInfo;
  * @description Tools for xx use
  * @date 2021-06-03
  **/
-public interface RoleInfoService  extends BaseService<RoleInfo, Integer>{
+public interface RoleInfoService  extends BaseService<RoleInfo, Integer> {
 }

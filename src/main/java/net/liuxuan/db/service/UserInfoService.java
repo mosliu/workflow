@@ -1,5 +1,6 @@
 package net.liuxuan.db.service;
 
+import net.liuxuan.common.BaseService;
 import net.liuxuan.db.entity.UserInfo;
 
 /**

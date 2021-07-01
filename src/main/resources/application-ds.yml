@@ -7,9 +7,9 @@ spring:
 #    driverClassName: com.mysql.cj.jdbc.Driver
 #    type: com.alibaba.druid.pool.DruidDataSource
     primary:
-      url: jdbc:mysql://172.23.16.80:3306/flowtest
-      username: root
-      password: dz123!@#
+      url: jdbc:mysql://172.23.16.64:3306/flowtest?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&&useInformationSchema=true&zeroDateTimeBehavior=convertToNull
+      username: qingbao
+      password: admin1234#
       driver-class-name: com.mysql.cj.jdbc.Driver
       type: com.alibaba.druid.pool.DruidDataSource
 
@@ -18,9 +18,9 @@ spring:
 #      driver: com.mysql.cj.jdbc.Driver
       # 以下两个hikari时候使用jdbc-url,druid使用url
 #      jdbc-url: jdbc:mysql://172.23.16.80:3306/activiti
-      url: jdbc:mysql://172.23.16.80:3306/activiti
-      username: root
-      password: dz123!@#
+      url: jdbc:mysql://172.23.16.64:3306/activiti?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&&useInformationSchema=true&zeroDateTimeBehavior=convertToNull
+      username: qingbao
+      password: admin1234#
       driverClassName: com.mysql.cj.jdbc.Driver
       type: com.alibaba.druid.pool.DruidDataSource
 

@@ -126,8 +126,9 @@
     <logger name="com.zaxxer.hikari.pool.HikariPool" level="INFO"/>
     <!--======================================================= druid =======================================================-->
     <logger name="druid.sql" level="${NORMALLEVEL}"/>
-    <!--<logger name="druid.sql.Statement" level="${NORMALLEVEL}"/>-->
-    <logger name="druid.sql.Statement" level="info"/>
+<!--    <logger name="druid.sql" level="debug"/>-->
+    <logger name="druid.sql.Statement" level="${NORMALLEVEL}"/>
+<!--    <logger name="druid.sql.Statement" level="debug"/>-->
     <!--======================================================= thymeleaf =======================================================-->
     <logger name="org.thymeleaf" level="${NORMALLEVEL}"/>
     <logger name="nz.net.ultraq.thymeleaf" level="${NORMALLEVEL}"/>
@@ -202,11 +203,13 @@
     <logger name="io.netty" level="${NORMALLEVEL}"/>
     <logger name="io.lettuce.core" level="${NORMALLEVEL}"/>
     <!--======================================================= activiti =======================================================-->
-    <logger name="org.activiti.engine.impl.interceptor.LogInterceptor" level="DEBUG"/>
-    <logger name="org.activiti.spring.SpringTransactionInterceptor" level="DEBUG"/>
-    <logger name="org.activiti.engine.impl.agenda.DefaultActivitiEngineAgenda" level="DEBUG"/>
-    <logger name="org.activiti.engine.impl.persistence.entity" level="DEBUG"/>
-    <logger name="org.activiti.engine.impl.db.DbSqlSession" level="DEBUG"/>
+    <logger name="org.activiti.engine.impl.interceptor.LogInterceptor" level="${NORMALLEVEL}"/>
+    <logger name="org.activiti.spring.SpringTransactionInterceptor" level="${NORMALLEVEL}"/>
+    <logger name="org.activiti.engine.impl.agenda.DefaultActivitiEngineAgenda" level="${NORMALLEVEL}"/>
+    <logger name="org.activiti.engine.impl.persistence.entity" level="${NORMALLEVEL}"/>
+    <logger name="org.activiti.engine.impl.db.DbSqlSession" level="${NORMALLEVEL}"/>
+    <logger name="org.activiti.engine.impl.asyncexecutor" level="${NORMALLEVEL}"/>
+    
 
     <root level="DEBUG">
         <appender-ref ref="console"/>

@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import net.liuxuan.utils.TreeNode;
+import net.liuxuan.utils.ITreeNode;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ import java.util.List;
 @Accessors(chain = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class MenuDto implements java.io.Serializable, TreeNode {
+public class MenuDto implements java.io.Serializable, ITreeNode {
 
     private Integer pid;
 
@@ -54,6 +54,6 @@ public class MenuDto implements java.io.Serializable, TreeNode {
 
     @Override
     public Integer getId() {
-        return null;
+        return pid;
     }
 }

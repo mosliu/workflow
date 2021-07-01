@@ -8,8 +8,11 @@ package net.liuxuan.security.service;
  **/
 
 import lombok.extern.slf4j.Slf4j;
+import net.liuxuan.cache.CacheService;
 import net.liuxuan.constants.MenuType;
 import net.liuxuan.db.entity.Menu;
+import net.liuxuan.db.entity.Privilege;
+import net.liuxuan.db.entity.RoleInfo;
 import net.liuxuan.db.entity.UserInfo;
 import net.liuxuan.db.service.MenuService;
 import net.liuxuan.db.service.RoleInfoService;
@@ -27,8 +30,6 @@ import net.liuxuan.utils.date.LocalTimeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -41,9 +42,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import static net.liuxuan.constants.SecurityConstants.*;
@@ -53,10 +54,12 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Slf4j
 public class LoginServiceImpl implements LoginService {
 
+//    @Autowired
+//    @Lazy
+//    private RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
-    @Lazy
-    private RedisTemplate<String, Object> redisTemplate;
+    CacheService cacheService;
 
     @Autowired
     UserInfoService userInfoService;
@@ -157,31 +160,51 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public UserDto findUserInfo() {
+
         // 从SecurityContextHolder中获取到，当前登录的用户信息。
         JwtUser userDetails = SecurityUtils.getLoginUser();
         // 根据用户Id，获取用户详细信息。
         UserInfo sysUser = userInfoService.findById(userDetails.getUid());
+        List<ButtonDto> buttonDtos = new ArrayList<>();
+        List<MenuDto> menuDtos = new ArrayList<>();
+        Set<RoleInfo> roleInfos = sysUser.getRoleInfos();
+        roleInfos.forEach(role -> {
+            Set<Privilege> privileges = role.getPrivileges();
+            privileges.forEach(privilege -> {
+                Set<Menu> menus = privilege.getMenus();
+                menus.forEach(menu -> {
+                    if (menu.getType().toLowerCase().equals(MenuType.BUTTON)) {
+                        buttonDtos.add(menu.toButtonDto());
+                    } else if (menu.getType().toLowerCase().equals(MenuType.MENU)) {
+                        menuDtos.add(menu.toMenuDto());
+                    } else {
+                        log.info("错误的menu类别：{}", menu);
+                    }
+                });
+
+
+            });
+        });
+
         UserDto result = new UserDto();
 //        BeanUtils.copyProperties(sysUser, result);
         result.setUid(sysUser.getId()).setUsername(sysUser.getName());
         // 根据用户Id，获取到拥有的 权限列表
 //        Set<SysPermission> permissions = sysPermissionService.findAllByUserId(sysUser.getUid());
-        List<ButtonDto> buttonDtos = new ArrayList<>();
-        List<MenuDto> menuDtos = new ArrayList<>();
 //        menuDtos.add(new MenuDto().setTitle("A").setPid(1).setParentId(0).setResources("pre"));
-        List<Menu> allMenu = menuService.findAll();
-        if (allMenu != null && allMenu.size() > 1) {
-            allMenu.forEach(menu -> {
-                if (menu.getType().toLowerCase().equals(MenuType.BUTTON)) {
-                    //如果权限是按钮，就添加到按钮里面
-                    buttonDtos.add(menu.toButtonDto());
-                }
-                if (menu.getType().toLowerCase().equals(MenuType.MENU)) {
-                    //如果权限是按钮，就添加到按钮里面
-                    menuDtos.add(menu.toMenuDto());
-                }
-            });
-        }
+//        List<Menu> allMenu = menuService.findAll();
+//        if (allMenu != null && allMenu.size() > 1) {
+//            allMenu.forEach(menu -> {
+//                if (menu.getType().toLowerCase().equals(MenuType.BUTTON)) {
+//                    //如果权限是按钮，就添加到按钮里面
+//                    buttonDtos.add(menu.toButtonDto());
+//                }
+//                if (menu.getType().toLowerCase().equals(MenuType.MENU)) {
+//                    //如果权限是按钮，就添加到按钮里面
+//                    menuDtos.add(menu.toMenuDto());
+//                }
+//            });
+//        }
         result.setButtons(buttonDtos);
         result.setMenus(TreeUtils.findRoot(menuDtos));
 //        result.setMenus(menuDtos);
@@ -192,9 +215,14 @@ public class LoginServiceImpl implements LoginService {
 //                .collect(Collectors.toSet());
 //        String departmentName = sysDepartmentService.findById(sysUser.getDeptId()).getName();
 //        result.setDepartmentName(departmentName);
-        Set<String> rolesName = new TreeSet<>();
-        rolesName.add("ROLE_ADMIN");
-        result.setRoles(rolesName);
+
+        List<RoleInfo> allroles = roleInfoService.findAll();
+        Set<RoleInfo> roles = new HashSet<>();
+//        Set<String> rolesName = new TreeSet<>();
+//        rolesName.add("ROLE_ADMIN");
+//        result.setRoles(rolesName);
+        roles.addAll(allroles);
+        result.setRoles(roles);
         return result;
     }
 
@@ -295,7 +323,8 @@ public class LoginServiceImpl implements LoginService {
             if (jwtTokenUtil.getSso()) {
                 String key = FORCED_OFFLINE_KEY + loginId;
                 // 判断此用户，是不是被挤下线
-                String offlineTime = (String) redisTemplate.opsForValue().get(key);
+//                String offlineTime = (String) redisTemplate.opsForValue().get(key);
+                String offlineTime = (String) cacheService.getValue(key);
                 if (org.springframework.util.StringUtils.hasText(offlineTime)) {
                     // 删除 被挤下线 的消息提示
                     removeLoginUser(key);
@@ -311,30 +340,34 @@ public class LoginServiceImpl implements LoginService {
     }
 
     private JwtUser getLoginUser(String loginId) {
-        JwtUser loginUser = (JwtUser) redisTemplate
-                .opsForValue().get(LOGIN_TOKEN_KEY + loginId);
+//        JwtUser loginUser = (JwtUser) redisTemplate
+//                .opsForValue().get(LOGIN_TOKEN_KEY + loginId);
+        JwtUser loginUser = (JwtUser) cacheService.getValue(LOGIN_TOKEN_KEY + loginId);
         return loginUser;
     }
 
     private void removeLoginUser(String loginId) {
-        redisTemplate.delete(loginId);
+        cacheService.delete(loginId);
+//        redisTemplate.delete(loginId);
     }
 
     private void setLoginUser(String loginId, JwtUser loginUser) {
         loginUser.setLoginId(loginId);
         String loginKey = LOGIN_TOKEN_KEY + loginId;
         // 将随机id 跟 当前登录的用户关联，在一起！
-        redisTemplate.opsForValue().set(
-                loginKey,
-                loginUser,
-                jwtTokenUtil.getExpiration(),
-                TimeUnit.MINUTES
-        );
+        cacheService.setValue(loginKey, loginUser, jwtTokenUtil.getExpiration(), TimeUnit.MINUTES);
+//        redisTemplate.opsForValue().set(
+//                loginKey,
+//                loginUser,
+//                jwtTokenUtil.getExpiration(),
+//                TimeUnit.MINUTES
+//        );
         // 判断是否开启 单点登录
         if (jwtTokenUtil.getSso()) {
             String onlineUserKey = ONLINE_USER_KEY + loginUser.getUsername();
 
-            String oldLoginKey = (String) redisTemplate.opsForValue().get(onlineUserKey);
+//            String oldLoginKey = (String) redisTemplate.opsForValue().get(onlineUserKey);
+            String oldLoginKey = (String) cacheService.getValue(onlineUserKey);
             // 判断用户名。是否已经登录了！
             if (org.springframework.util.StringUtils.hasText(oldLoginKey)) {
                 // 移除之前登录的用户
@@ -346,19 +379,21 @@ public class LoginServiceImpl implements LoginService {
                 // 获取当前时间
                 String milli = LocalTimeUtils.currentSecondFormat();
                 // 将 被强制挤下线的用户，以及时间，保存到 redis中，提示给前端用户！
-                redisTemplate.opsForValue().set(
-                        FORCED_OFFLINE_KEY + oldLoginKey,
-                        milli,
-                        5,
-                        TimeUnit.MINUTES
-                );
+                cacheService.setValue(FORCED_OFFLINE_KEY + oldLoginKey, milli, 5, TimeUnit.MINUTES);
+//                redisTemplate.opsForValue().set(
+//                        FORCED_OFFLINE_KEY + oldLoginKey,
+//                        milli,
+//                        5,
+//                        TimeUnit.MINUTES
+//                );
             }
-            redisTemplate.opsForValue().set(
-                    onlineUserKey,
-                    loginId,
-                    jwtTokenUtil.getExpiration(),
-                    TimeUnit.MINUTES
-            );
+            cacheService.setValue(onlineUserKey, loginId, jwtTokenUtil.getExpiration(), TimeUnit.MINUTES);
+//            redisTemplate.opsForValue().set(
+//                    onlineUserKey,
+//                    loginId,
+//                    jwtTokenUtil.getExpiration(),
+//                    TimeUnit.MINUTES
+//            );
         }
     }
 
