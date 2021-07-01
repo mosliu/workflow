@@ -1,9 +1,15 @@
 package net.liuxuan.common;
 
 import lombok.extern.slf4j.Slf4j;
+import net.liuxuan.db.page.PageParameter;
 import net.liuxuan.springconf.CommonResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Liuxuan
@@ -34,6 +40,19 @@ public class BaseController<T, ID, S extends BaseService<T, ID>> {
     public CommonResponseDto findAll() {
         return CommonResponseDto.success(baseService.findAll());
     }
+
+    @GetMapping("/page")
+    public CommonResponseDto findAllByPage(PageParameter parameter) {
+        Page<T> allPage = baseService.findAllPage( parameter);
+
+//        log.info("{}", allPage.getContent());
+        List<T> content = allPage.getContent();
+        Map<String, Object> rtnM = new HashMap<>();
+        rtnM.put("list", content);
+        rtnM.put("total", allPage.getTotalPages());
+        return CommonResponseDto.success(rtnM);
+    }
+
 
 //    /**
 //     * 分页 查询所有
