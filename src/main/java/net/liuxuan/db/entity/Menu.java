@@ -1,5 +1,6 @@
 package net.liuxuan.db.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import net.liuxuan.security.dto.ButtonDto;
@@ -16,6 +17,7 @@ import java.util.Set;
 @Getter
 @Setter
 @RequiredArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(exclude = "privileges")
 @ToString(exclude = "privileges")
 @Entity
@@ -68,11 +70,13 @@ public class Menu implements Serializable {
      * inverseJoinColumns：配置对方对象在中间表的外键
      */
     @JsonIgnoreProperties(value = "menus")
+    @JsonIgnore
     @JoinTable(name = "Menu_Privilege",
             joinColumns = {@JoinColumn(name = "menuId", referencedColumnName = "ID")},
             inverseJoinColumns = {@JoinColumn(name = "privilegeId", referencedColumnName = "ID")})
     @ManyToMany(targetEntity = Privilege.class, cascade = CascadeType.ALL)
-    private Set<Privilege> privileges = new HashSet<>();
+    private Set<Privilege> privileges = null;
+//    private Set<Privilege> privileges = new HashSet<>();
 
     public ButtonDto toButtonDto() {
         ButtonDto dto = new ButtonDto();

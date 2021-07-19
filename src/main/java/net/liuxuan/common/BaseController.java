@@ -7,9 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static net.liuxuan.utils.MyBeanUtils.copyPropertiesIgnoreNull;
 
 /**
  * @author Liuxuan
@@ -43,7 +46,7 @@ public class BaseController<T, ID, S extends BaseService<T, ID>> {
 
     @GetMapping("/page")
     public CommonResponseDto findAllByPage(PageParameter parameter) {
-        Page<T> allPage = baseService.findAllPage( parameter);
+        Page<T> allPage = baseService.findAllPage(parameter);
 
 //        log.info("{}", allPage.getContent());
         List<T> content = allPage.getContent();
@@ -70,6 +73,9 @@ public class BaseController<T, ID, S extends BaseService<T, ID>> {
     public CommonResponseDto create(@RequestBody T entity) {
         log.info("create:  {}", entity);
         try {
+            T find = baseService.find(entity);
+
+
             T save = baseService.save(entity);
             return CommonResponseDto.success(save);
         } catch (Exception e) {
@@ -85,7 +91,28 @@ public class BaseController<T, ID, S extends BaseService<T, ID>> {
      */
     @PutMapping()
     public CommonResponseDto update(@RequestBody T entity) {
+
         log.info("update:  {}", entity);
+
+        try {
+            //反射获取id
+            Class<?> aClass = entity.getClass();
+            Field idField = null;
+            idField = aClass.getDeclaredField("id");
+            idField.setAccessible(true);
+            Object o = idField.get(entity);
+            T byId = baseService.findById((ID) o);
+            //仅复制非空属性
+            copyPropertiesIgnoreNull(entity, byId);
+            entity = byId;
+
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            log.error("反射获取id失败", e);
+        } catch (Exception otherException) {
+            log.error("反射获取id失败", otherException);
+        }
+
+
         try {
             T save = baseService.save(entity);
             return CommonResponseDto.success(save);

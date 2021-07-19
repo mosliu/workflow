@@ -10,10 +10,7 @@ import net.liuxuan.springconf.CommonResponseDto;
 import net.liuxuan.utils.TreeNode;
 import net.liuxuan.utils.TreeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +50,8 @@ public class MenuController extends BaseController<Menu, Integer, MenuService> {
 
 
     @Override
-    public CommonResponseDto create(Menu entity) {
+    @PostMapping()
+    public CommonResponseDto create(@RequestBody Menu entity) {
         Integer parentId = entity.getParentId();
 
         Privilege privilege = new Privilege();
@@ -74,18 +72,5 @@ public class MenuController extends BaseController<Menu, Integer, MenuService> {
         return super.create(entity);
     }
 
-    @Override
-    public CommonResponseDto update(Menu entity) {
-        return super.update(entity);
-    }
 
-    @Override
-    public CommonResponseDto delete(Integer integer) {
-        //同时删除权限
-//        Menu byId = baseService.findById(integer);
-//        byId.setPrivileges(new HashSet<>());
-//
-
-        return super.delete(integer);
-    }
 }
